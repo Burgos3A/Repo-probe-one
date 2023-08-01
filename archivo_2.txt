@@ -1,0 +1,12 @@
+Trinity --seqType fq --left reads_1.fq --right reads_2.fq --CPU 6 --max_memory 20G --SS_lib_type RF # 2G per millon read transcriptome denovo assembly 
+grep -c '>' trinity.fasta #to count the total number of transcripts (transcript's genes + long non-coding RNAs + artifacs)
+TransDecoder.LongOrfs -t trinity.fasta 
+grep -c '>' longest_orfs.cds # to count the number of detected orf, complete orf, partials and internals
+grep -c complete longest_orfs.cds
+blastp -query longest_orfs.pep -db swissprot.fasta -outfmt 6 -evalue 1e-20 -num_threads 12 -max_target_seqs 10 > longest.orf.blast.out
+cut -f 1 longest.orf.blast.out | uniq | wc -l
+annotateORFs.py longest_orfs.cds longest.orf.blast.out > referenceORF.fas
+grep '>' referenceORF.fas | cut -d '|' -f 2 | head
+grep '>' referenceORF.fas | cut -d '|' -f 2 | sort | less
+grep '>' referenceORF.fas | cut -d '|' -f 2 | sort | uniq -c | less
+grep '>' referenceORF.fas | cut -d '|' -f 2 | sort | uniq -c | sort -n | less
